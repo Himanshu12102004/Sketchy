@@ -29,22 +29,32 @@ class SVG {
     );
     const incInT = 1 / numPoints;
     const points: SampledPoint[] = [];
-    let acc = new Point(0, 0);
-    let cnt = 0;
+    // for (let k = 0; k <= numPoints; k++) {
+    //   let i = k / numPoints;
+    //   let pt = this.calculatePoint(i);
+    //   points.push({ t: i, x: pt.x, y: pt.y });
+    // }
     for (let i = 0; i <= 1; i += incInT) {
+      let pt = this.calculatePoint(i);
       points.push({
         t: i,
-        x: this.calculatePoint(i).x,
-        y: this.calculatePoint(i).y,
+        x: pt.x,
+        y: pt.y,
       });
-      acc.add(new Point(points[cnt].x, points[cnt].y));
-      cnt++;
     }
-    // acc.divide(numPoints);
-    // for (let i = 0; i < cnt; i++) {
-    //   points[i].x = points[i].x - acc.x;
-    //   points[i].y = acc.y - points[i].y;
-    // }
+    // points.push({x:pt.x,y:pt.y,t:1});
+    // let pt = this.calculatePoint(1);
+    // points.push({
+    //   t: 1,
+    //   x: pt.x,
+    //   y: pt.y,
+    // });
+    // pt = this.calculatePoint(0);
+    // points.push({
+    //   t: 0,
+    //   x: pt.x,
+    //   y: pt.y,
+    // });
     this.sampledPoints = points;
   }
 }

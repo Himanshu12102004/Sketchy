@@ -34,6 +34,7 @@ class Master {
         throw new Error('The path element does not contain a "d" attribute.');
       }
       const svgComponents = Master.splitSubPaths(pathData);
+      console.log(svgComponents)
       for (let j = 0; j < svgComponents.length; j++) {
         this.componentSVGs.push(new SVG(svgComponents[j]));
       }
@@ -67,9 +68,12 @@ class Master {
   static splitSubPaths(svgPath: string): string[] {
     // let convertedPath = Master.convertRelativeToAbsolute(svgPath);
     // console.log(convertedPath);
+    if(svgPath[0]=='m'){
+      return [svgPath]
+    }
     const commands = svgPath.match(/([M][^M]*)/g);
     return commands ? commands.map((cmd) => cmd.trim()) : [];
-    return [svgPath];
+    // return [svgPath];
   }
   samplePath() {
     // for (let i = 0; i < this.componentSVGs.length; i++) {

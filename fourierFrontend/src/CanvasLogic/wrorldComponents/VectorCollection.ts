@@ -10,14 +10,30 @@ interface SampledPoint {
 }
 class VectorCollection {
   vectors: Vector[];
-  vao: WebGLVertexArrayObject | null;
+  vectorVao: WebGLVertexArrayObject | null;
   lines: number[];
   lineVao: WebGLVertexArrayObject | null;
+  lineColor: number[];
+  vectorColor: number[];
+  calledForTheFirstTime: boolean;
+  lineColorLocation: WebGLUniformLocation | null;
+  vectorColorLocation: WebGLUniformLocation | null;
   constructor() {
     this.vectors = [];
-    this.vao = null;
+    this.vectorVao = null;
     this.lines = [];
     this.lineVao = null;
+    this.lineColor = [Math.random(), Math.random(), Math.random(), 1];
+    this.vectorColor = [Math.random(), Math.random(), Math.random(), 1];
+    this.calledForTheFirstTime = true;
+    this.lineColorLocation = GlobalVariables.gl.getUniformLocation(
+      GlobalVariables.program,
+      'lineColor'
+    );
+    this.vectorColorLocation = GlobalVariables.gl.getUniformLocation(
+      GlobalVariables.program,
+      'vectorColor'
+    );
   }
   computeCn(n: number, sampledPoints: SampledPoint[]): Point {
     let Cn = new Point(0, 0);
@@ -72,7 +88,11 @@ class VectorCollection {
         pointsArray
       );
     }
-    this.lines.push(...newPoint.getPoint(), performance.now());
+    if (!this.calledForTheFirstTime) {
+      this.lines.push(...newPoint.getPoint(), performance.now());
+    } else {
+      this.calledForTheFirstTime = false;
+    }
     return pointsArray;
   }
   reCalculateVectorWidths() {
@@ -126,8 +146,8 @@ class VectorCollection {
       GlobalVariables.program,
       'vertex'
     );
-    if (this.vao == null) {
-      this.vao = createVao(
+    if (this.vectorVao == null) {
+      this.vectorVao = createVao(
         [
           {
             bufferArray: float32vertex,
@@ -142,7 +162,7 @@ class VectorCollection {
       );
     } else {
       updateVao(
-        this.vao,
+        this.vectorVao,
         [
           {
             bufferArray: float32vertex,
@@ -168,7 +188,7 @@ class VectorCollection {
   }
   draw() {
     GlobalVariables.gl.useProgram(GlobalVariables.program);
-    GlobalVariables.gl.bindVertexArray(this.vao);
+    GlobalVariables.gl.bindVertexArray(this.vectorVao);
     GlobalVariables.gl.drawArrays(
       GlobalVariables.gl.TRIANGLES,
       0,
@@ -179,6 +199,14 @@ class VectorCollection {
     let vertexPoints = this.generateVectorPoints();
     this.setVao(vertexPoints);
     this.setLineVao(this.lines);
+    GlobalVariables.gl.uniform4fv(
+      this.vectorColorLocation,
+      new Float32Array(this.vectorColor)
+    );
+    GlobalVariables.gl.uniform4fv(
+      this.lineColorLocation,
+      new Float32Array(this.lineColor)
+    );
     this.drawLines();
     this.draw();
   }
