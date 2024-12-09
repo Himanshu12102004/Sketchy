@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { imageReceiver } from '../../CanvasLogic/main';
 import VectorList from '../vectorList/VectorList';
 import Welcome from '../welocme/Welcome';
+import Settings from '../entireDrawingSettings/Settings';
 // import CustomSlider from '../slider/slider';
-
 function SideBar() {
-  const defaultImage = 'react.svg'; // Path to your default image
+  const defaultImage = 'default.svg'; // Path to your default image
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string>(defaultImage);
   const [imageNumber, setImageNumber] = useState(0);
@@ -66,7 +66,7 @@ function SideBar() {
           <p className="mb-2 text-sm text-center text-gray-500">
             Drag and drop an image or select one to start drawing.
           </p>
-          <div className="flex flex-col items-center pb-5">
+          <div className="flex flex-col items-center pb-2">
             <label
               htmlFor="fileInput"
               className="cursor-pointer text-white bg-blue-500 py-2 px-3 rounded-md shadow-md hover:bg-blue-600 transition duration-200 text-center mb-2 text-sm"
@@ -91,6 +91,7 @@ function SideBar() {
             console.log(n);
           }}
         ></CustomSlider> */}
+        <Settings />
         <VectorList imageNumber={imageNumber} />
       </div>
     </div>

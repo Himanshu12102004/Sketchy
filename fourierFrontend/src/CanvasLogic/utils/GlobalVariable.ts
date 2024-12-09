@@ -3,10 +3,9 @@ import SVG from '../svgComputation/calculatePoint';
 import VectorCollection from '../wrorldComponents/VectorCollection';
 import Point from '../wrorldComponents/Point';
 import { setUniforms } from '../main';
-
 class GlobalVariables {
   static bounds = { maxX: 0, minX: 0, maxY: 0, minY: 0 };
-  static graphScale = { scale: 1 };
+  static graphScale = { scale: 0.8 };
   static screenDimensions = { height: 600, width: 800 };
   static gl: WebGL2RenderingContext;
   static shaders = {
@@ -30,6 +29,12 @@ class GlobalVariables {
   static grabageClearingTime: number;
   static grabageClearingHandle: number;
   static imageNumber: number;
+  static alpha= { defaultVectorAlpha: 0.0,defaultLineAlpha: 1 };
+  static monochromeColour = {
+    r: 255,
+    g: 255,
+    b: 255,
+  };
   static trackingData = {
     index: -1,
     isRetractingDone: false,
@@ -45,7 +50,7 @@ class GlobalVariables {
   };
   static imageChangeInit() {
     GlobalVariables.trackingData = {
-      isRetractingDone:false,
+      isRetractingDone: false,
       index: -1,
       isTrackingValueChanged: false,
       isZoomOutDone: false,
@@ -53,7 +58,8 @@ class GlobalVariables {
       isZoomInDone: false,
       t: 0,
     };
-    GlobalVariables.graphScale.scale = 1;
+    GlobalVariables.animationParams.speed = 0.0001;
+    GlobalVariables.graphScale.scale = 0.8;
     GlobalVariables.bounds = {
       maxX:
         GlobalVariables.screenDimensions.width /
@@ -70,6 +76,8 @@ class GlobalVariables {
     };
   }
   static init(canvas: HTMLCanvasElement) {
+    GlobalVariables.alpha.defaultLineAlpha = 1;
+    GlobalVariables.alpha.defaultVectorAlpha = 0.0;
     GlobalVariables.canvasParent = document.querySelector('#canvas_parent')!;
     GlobalVariables.screenDimensions.height =
       GlobalVariables.canvasParent.clientHeight;

@@ -1,193 +1,32 @@
-import { ArrowUp01, Info } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Slider from '@mui/material/Slider';
+import VolumeDown from '@mui/icons-material/VolumeDown';
+import VolumeUp from '@mui/icons-material/VolumeUp';
+import { FaEye, FaRegEyeSlash } from 'react-icons/fa';
+interface props {
+  heading: string;
+  setValueOfSlider: (value: number) => void;
+  currentValue: number;
+}
+export default function ContinuousSlider(prop: props) {
+  const [value, setValue] = React.useState<number>(prop.currentValue);
 
-export default function Slider({
-  name = 'Polygon Count',
-  description = 'Slider',
-  min = 0,
-  max = 50,
-  value = 50,
-  step = 1,
-  icon = <ArrowUp01 size={18} />,
-  setValue = () => {},
-}: {
-  name?: string;
-  description?: string;
-  min?: number;
-  max?: number;
-  value?: number;
-  step?: number;
-  icon?: JSX.Element;
-  setValue?: (name: string, value: number) => void;
-}) {
-  const canvasRef = useRef(document.createElement("canvas") as HTMLCanvasElement); // prettier-ignore
-  const pointerRef = useRef(document.createElement('div') as HTMLDivElement);
-  const parentRef = useRef(document.createElement('div') as HTMLDivElement);
-  const isDragging = useRef(false);
-  const currentValueRef = useRef(value);
-
-  const updateCanvas = useCallback(
-    (displayValue: number) => {
-      const canvas: HTMLCanvasElement = canvasRef.current;
-      const ctx: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D; // prettier-ignore
-      const width: number = canvas.width;
-      const height: number = canvas.height;
-
-      ctx.fillStyle = '#D1D5DB';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = '#2563EB';
-      ctx.fillRect(0, 0, ((displayValue - min) / (max - min)) * width, height);
-    },
-    [min, max]
-  );
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging.current) return;
-
-      const parentRect = parentRef.current.getBoundingClientRect();
-      const pointerRect = pointerRef.current.getBoundingClientRect();
-      const pointerWidth = pointerRect.width;
-
-      let newX = e.clientX - parentRect.left - pointerWidth / 2;
-      newX = Math.max(0, Math.min(newX, parentRect.width));
-
-      pointerRef.current.style.left = `${newX}px`;
-
-      const newValue =
-        min + (newX / (parentRect.width - pointerWidth)) * (max - min);
-      const steppedValue = Math.round(newValue / step) * step;
-      currentValueRef.current = Math.max(min, Math.min(max, steppedValue));
-
-      updateCanvas(currentValueRef.current);
-      setValue(name, currentValueRef.current); // Update the value while dragging
-    },
-    [min, max, step, updateCanvas, setValue, name]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    if (isDragging.current) {
-      setValue(name, currentValueRef.current);
-    }
-    isDragging.current = false;
-    parentRef.current.removeEventListener('mousemove', handleMouseMove);
-    parentRef.current.removeEventListener('mouseup', handleMouseUp);
-  }, [name, setValue, handleMouseMove]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (isDragging.current) {
-      setValue(name, currentValueRef.current);
-    }
-    isDragging.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }, [name, setValue, handleMouseMove, handleMouseUp]);
-
-  const handleMouseDown = useCallback(
-    (e: MouseEvent) => {
-      e.preventDefault();
-      if (e.currentTarget !== e.target) return;
-      isDragging.current = true;
-      parentRef.current.addEventListener('mousemove', handleMouseMove);
-      parentRef.current.addEventListener('mouseup', handleMouseUp);
-      parentRef.current.addEventListener('mouseleave', handleMouseLeave);
-    },
-    [handleMouseMove, handleMouseUp, handleMouseLeave]
-  );
-
-  const handleCanvasClick = useCallback(
-    (e: MouseEvent) => {
-      const parentRect = parentRef.current.getBoundingClientRect();
-      const position = e.clientX - parentRect.left;
-      const value = (position / parentRect.width) * (max - min) + min;
-
-      const roundOffValue = Math.round(value / step) * step;
-      setValue(name, roundOffValue);
-    },
-    [name, min, max, step, setValue]
-  );
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-
-    updateCanvas(value);
-    currentValueRef.current = value;
-
-    const parentRect = parentRef.current.getBoundingClientRect();
-    const initialX = ((value - min) / (max - min)) * parentRect.width;
-
-    pointerRef.current.style.left = `${initialX}px`;
-
-    pointerRef.current.addEventListener('mousedown', handleMouseDown);
-
-    parentRef.current.addEventListener('mousedown', handleCanvasClick);
-
-    // * Suggested by typescript to cleanup these values when the component unmounts
-    // * as the values of pointerRef.current may have changed by the time the cleanup function is called
-    const pointerRefCurrent = pointerRef.current;
-    const parentRefCurrent = parentRef.current;
-    return () => {
-      pointerRefCurrent.removeEventListener('mousedown', handleMouseDown);
-
-      parentRefCurrent.removeEventListener('mousedown', handleCanvasClick);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [
-    value,
-    min,
-    max,
-    handleCanvasClick,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    updateCanvas,
-  ]);
-
-  const handleInputChange = (e: any) => {
-    const newValue = Math.max(min, Math.min(max, Number(e.target.value)));
-    setValue(name, newValue);
+  const handleChange = (event: Event, newValue: number | number[]) => {
+    setValue(newValue as number);
+    prop.setValueOfSlider(newValue as number);
   };
-
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <div className="flex flex-row gap-1">
-        {icon}
-        <span className="text-stone-600 text-sm">{name}</span>
-      </div>
-      <div className="flex flex-row gap-6 items-center">
-        <div className="flex flex-row gap-2 w-full items-center">
-          <span className="text-sm text-stone-600">{min}</span>
-          <div
-            ref={parentRef}
-            className="flex flex-row gap-2 h-3 items-center relative w-full"
-          >
-            <canvas ref={canvasRef} className="w-full h-[3px] rounded-md" />
-            <div
-              ref={pointerRef}
-              className="absolute bg-white w-4 h-4 border-[5px] border-blue-500 rounded-full cursor-pointer hover:border-blue-600 active:border-blue-700"
-              style={{ transform: 'translateX(-50%)' }}
-            ></div>
-          </div>
-          <span className="text-sm text-stone-600 ml-4">{max}</span>
-        </div>
-        <input
-          type="number"
-          value={value}
-          onChange={handleInputChange}
-          min={min}
-          max={max}
-          step={step}
-          className="px-1 min-w-10 h-9 text-center text-sm text-stone-600 outline outline-1 outline-stone-300 rounded-md"
-        />
-      </div>
-      <div className="flex flex-row gap-2 mt-2 mb-8">
-        <Info size={16} />
-        <span className="text-stone-400 text-xs">{description}</span>
-      </div>
+    <div>
+      <div className="text-sm">{prop.heading}</div>
+      <Box sx={{ width: 200 }}>
+        <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
+          <FaRegEyeSlash size={25} color="rgb(150,150,150)"></FaRegEyeSlash>
+          <Slider aria-label="Volume" value={value} onChange={handleChange} />
+          <FaEye size={25} color="rgb(150,150,150)"></FaEye>
+        </Stack>
+      </Box>
     </div>
   );
 }

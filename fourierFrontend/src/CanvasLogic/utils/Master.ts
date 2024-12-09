@@ -3,11 +3,12 @@ import SVG from '../svgComputation/calculatePoint';
 import VectorCollection from '../wrorldComponents/VectorCollection';
 import Point from '../wrorldComponents/Point';
 import svgPath from 'svgpath';
+import GlobalVariables from './GlobalVariable';
+
 class Master {
   properties: any;
   componentSVGs: SVG[];
   vectorCollection: VectorCollection[];
-
   vectorStates: number[];
   constructor() {
     this.componentSVGs = [];
@@ -148,7 +149,10 @@ class Master {
       }
     }
     this.componentSVGs.forEach((svg) => {
-      let vecColl = new VectorCollection();
+      let vecColl = new VectorCollection(
+        GlobalVariables.alpha.defaultLineAlpha,
+        GlobalVariables.alpha.defaultVectorAlpha
+      );
       vecColl.makeVectors(svg.sampledPoints);
       this.vectorCollection.push(vecColl);
     });
@@ -189,24 +193,24 @@ class Master {
   }
   resetVectorState(index: number, state: number) {
     if (state == 0) {
-      this.vectorCollection[index].lineAlpha = 1;
-      this.vectorCollection[index].vectorAlpha = 0.2;
+      this.vectorCollection[index].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+      this.vectorCollection[index].vectorAlpha =GlobalVariables.alpha.defaultVectorAlpha;
     } else if (state == 1) {
-      this.vectorCollection[index].lineAlpha = 1;
-      this.vectorCollection[index].vectorAlpha = 0.2;
+      this.vectorCollection[index].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+      this.vectorCollection[index].vectorAlpha = GlobalVariables.alpha.defaultVectorAlpha;
       for (let i = 0; i < this.vectorStates.length; i++) {
         if (this.vectorStates[i] == -1) {
-          this.vectorCollection[i].lineAlpha = 1;
-          this.vectorCollection[i].vectorAlpha = 0.2;
+          this.vectorCollection[i].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+          this.vectorCollection[i].vectorAlpha = GlobalVariables.alpha.defaultVectorAlpha;
         }
       }
     } else if (state == 2) {
-      this.vectorCollection[index].lineAlpha = 1;
-      this.vectorCollection[index].vectorAlpha = 0.2;
+      this.vectorCollection[index].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+      this.vectorCollection[index].vectorAlpha = GlobalVariables.alpha.defaultVectorAlpha;
       for (let i = 0; i < this.vectorStates.length; i++) {
         if (this.vectorStates[i] == -1) {
-          this.vectorCollection[i].lineAlpha = 1;
-          this.vectorCollection[i].vectorAlpha = 0.2;
+          this.vectorCollection[i].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+          this.vectorCollection[i].vectorAlpha = GlobalVariables.alpha.defaultVectorAlpha;
         }
       }
     }
@@ -242,6 +246,40 @@ class Master {
   disposeGarbage() {
     for (let i = 0; i < this.vectorCollection.length; i++) {
       this.vectorCollection[i].disposeGarbage();
+    }
+  }
+  setDefaultVectorAlpha() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].vectorAlpha = GlobalVariables.alpha.defaultVectorAlpha;
+    }
+  }
+  setDefaultLineAlpha() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].lineAlpha = GlobalVariables.alpha.defaultLineAlpha;
+    }
+  }
+  restoreColors() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].vectorColor = [
+        Math.random(),
+        Math.random(),
+        Math.random(),
+      ];
+      this.vectorCollection[i].lineColor = this.vectorCollection[i].vectorColor;
+    }
+    const vectorsCreatedEvent = new CustomEvent('vectorsCreated', {
+      detail: { vectors: GlobalVariables.master.getVectorColor() },
+    });
+    window.dispatchEvent(vectorsCreatedEvent);
+  }
+  setMonochromeColor() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].vectorColor = [
+        GlobalVariables.monochromeColour.r / 255,
+        GlobalVariables.monochromeColour.g / 255,
+        GlobalVariables.monochromeColour.b / 255,
+      ];
+      this.vectorCollection[i].lineColor = this.vectorCollection[i].vectorColor;
     }
   }
 }

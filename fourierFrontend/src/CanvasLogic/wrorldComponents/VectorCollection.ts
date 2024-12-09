@@ -22,7 +22,7 @@ class VectorCollection {
   vectorColorLocation: WebGLUniformLocation | null;
   lineAlphaLocation: WebGLUniformLocation | null;
   vectorAlphaLocation: WebGLUniformLocation | null;
-  constructor() {
+  constructor(defaultLineAlpha: number, defaultVectorAlpha: number) {
     this.vectors = [];
     this.vectorVao = null;
     this.lines = [];
@@ -30,8 +30,8 @@ class VectorCollection {
     this.vectorColor = [Math.random(), Math.random(), Math.random()];
     this.lineColor = this.vectorColor;
     this.calledForTheFirstTime = true;
-    this.vectorAlpha = 0.2;
-    this.lineAlpha = 1;
+    this.vectorAlpha = defaultVectorAlpha;
+    this.lineAlpha = defaultLineAlpha;
     this.lineColorLocation = GlobalVariables.gl.getUniformLocation(
       GlobalVariables.program,
       'lineColor'

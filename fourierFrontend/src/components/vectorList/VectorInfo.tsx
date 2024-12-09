@@ -9,6 +9,7 @@ import { MdBlurOn, MdZoomIn } from 'react-icons/md';
 import GlobalVariables from '../../CanvasLogic/utils/GlobalVariable';
 import { CgTrack } from 'react-icons/cg';
 import { setTracking } from '../../CanvasLogic/main';
+import Slider from '../slider/Slider';
 
 interface VectorInfoProps {
   color: number[]; // RGB values as a tuple
@@ -61,7 +62,7 @@ const VectorInfo: React.FC<VectorInfoProps> = ({
         color: '#333',
         transition: 'all 0.3s ease',
         overflow: 'hidden',
-        height: isHovered ? '100px' : '50px',
+        height: isHovered ? '170px' : '50px',
         cursor: 'pointer',
       }}
     >
@@ -146,7 +147,27 @@ const VectorInfo: React.FC<VectorInfoProps> = ({
             color: '#666',
           }}
         >
-          Expanded Content Here
+          <Slider
+            heading="Vector Opacity"
+            setValueOfSlider={(value) => {
+              GlobalVariables.master.vectorCollection[index].vectorAlpha =
+                value / 100;
+            }}
+            currentValue={
+              GlobalVariables.master.vectorCollection[index].vectorAlpha * 100
+            }
+          ></Slider>
+
+          <Slider
+            heading="Drawing Opacity"
+            setValueOfSlider={(value) => {
+              GlobalVariables.master.vectorCollection[index].lineAlpha =
+                value / 100;
+            }}
+            currentValue={
+              GlobalVariables.master.vectorCollection[index].lineAlpha * 100
+            }
+          ></Slider>
         </div>
       )}
     </div>

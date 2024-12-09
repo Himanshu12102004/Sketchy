@@ -206,10 +206,9 @@ function main(canvas: HTMLCanvasElement) {
 function setTracking(index: number) {
   if (index == -1) {
     GlobalVariables.trackingData.isTrackingValueChanged = false;
-  }
-  else {
-  GlobalVariables.trackingData.isTrackingValueChanged = true;
-  GlobalVariables.trackingData.isRetractingDone = false;
+  } else {
+    GlobalVariables.trackingData.isTrackingValueChanged = true;
+    GlobalVariables.trackingData.isRetractingDone = false;
   }
   GlobalVariables.trackingData.index = index;
   GlobalVariables.trackingData.isZoomOutDone = false;

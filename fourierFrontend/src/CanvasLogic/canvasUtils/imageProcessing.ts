@@ -18,10 +18,13 @@ async function convertAndProcessImage(file: File) {
       body: formData,
     });
 
-    if (!response.ok) throw new Error('Failed to convert image to SVG');
-
-    const svgContent = await response.text();
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    if (!response.ok) {
+      const event = new CustomEvent('someError');
+      window.dispatchEvent(event);
+      return fetchDefaultSVG("error.svg")
+    }
+    const svgContent = await response.json();
+    const blob = new Blob([svgContent.message], { type: 'image/svg+xml' });
     const svgFile = new File([blob], 'converted.svg', {
       type: 'image/svg+xml',
     });
@@ -43,8 +46,8 @@ function finalizeProcessing() {
     GlobalVariables.master.disposeGarbage();
   }, GlobalVariables.grabageClearingTime);
 }
-async function fetchDefaultSVG(): Promise<File> {
-  const response = await fetch('react.svg');
+async function fetchDefaultSVG(fileName='default.svg'): Promise<File> {
+  const response = await fetch(fileName);
   const svgContent = await response.text();
   const file = new File([svgContent], 'default.svg', { type: 'image/svg+xml' });
   return file;

@@ -20,20 +20,22 @@ app.post('/convert', upload.single('image'), async (req, res) => {
       .grayscale()
       .threshold(128)
       .toFile(processedPath);
-    potrace.trace(
-      processedPath,
-      (err, svg) => {
-        fs.unlinkSync(imagePath);
-        fs.unlinkSync(processedPath);
-        if (err) return res.status(500).send('Error processing image');
-        res.setHeader('Content-Type', 'image/svg+xml');
-        res.send(svg);
-      }
-    );
+    potrace.trace(processedPath, (err, svg) => {
+      fs.unlinkSync(imagePath);
+      fs.unlinkSync(processedPath);
+      if (err) return res.status(500).send('Error processing image');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.json({
+        success: true,
+        message: svg,
+      });
+    });
   } catch (err) {
-    console.error('Error during image processing:', err);
     fs.unlinkSync(imagePath);
-    return res.status(500).send('Error processing image');
+    return res.status(500).json({
+      success: false,
+      message: 'someErrorOccured',
+    });
   }
 });
 

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import GlobalVariables from '../../CanvasLogic/utils/GlobalVariable';
-
 interface CanvasProps {
   onCanvasReady: (canvas: HTMLCanvasElement) => void;
 }
