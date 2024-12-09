@@ -36,6 +36,6 @@ if(timestamp>0.0){
         // color = vec4(1, 1, 1,1.0);
 }
 else
-  color=vec4(vectorColor[0],vectorColor[1],vectorColor[2],0);
+  color=vec4(vectorColor[0],vectorColor[1],vectorColor[2],vAlpha);
 }`;
 export { vertexShader, fragmentShader };

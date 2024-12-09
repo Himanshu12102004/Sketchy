@@ -5,9 +5,92 @@ import Master from './utils/Master';
 import { fragmentShader, vertexShader } from './utils/shaders';
 import { compileShader } from './utils/compileShader';
 import { setCenterTo, setUniforms } from './canvasUtils/canvasUtils';
-import { convertAndProcessImage, fetchDefaultSVG, finalizeProcessing, processSvg } from './canvasUtils/imageProcessing';
+import {
+  convertAndProcessImage,
+  fetchDefaultSVG,
+  finalizeProcessing,
+  processSvg,
+} from './canvasUtils/imageProcessing';
+import Point from './wrorldComponents/Point';
+function calculateNewCenter(start: Point, t: number, destination: Point) {
+  return new Point(
+    (1 - t) * start.x + t * destination.x,
+    (1 - t) * start.x + t * destination.y
+  );
+}
+function trackingValueChanged() {
+  GlobalVariables.trackingData.lastCenter = new Point(
+    (GlobalVariables.bounds.maxX + GlobalVariables.bounds.minX) / 2,
+    (GlobalVariables.bounds.maxY + GlobalVariables.bounds.minY) / 2
+  );
+  GlobalVariables.trackingData.t += 0.007;
+  if (GlobalVariables.graphScale.scale >= 100) {
+    GlobalVariables.trackingData.isZoomInDone = true;
+    GlobalVariables.graphScale.scale = 100;
+  }
+  if (GlobalVariables.trackingData.t > 1) GlobalVariables.trackingData.t = 1;
+  let lines =
+    GlobalVariables.master.vectorCollection[GlobalVariables.trackingData.index]
+      .lines;
+  let point = calculateNewCenter(
+    GlobalVariables.trackingData.lastCenter,
+    GlobalVariables.trackingData.t,
+    new Point(lines[lines.length - 3], lines[lines.length - 2])
+  );
+  setCenterTo(point);
+  if (
+    GlobalVariables.graphScale.scale < 4 &&
+    !GlobalVariables.trackingData.isZoomOutDone
+  ) {
+    GlobalVariables.trackingData.isZoomInDone = false;
+    GlobalVariables.trackingData.isZoomOutDone = true;
+  }
+  if (!GlobalVariables.trackingData.isZoomOutDone) {
+    GlobalVariables.animationParams.speed =
+      0.0001 / GlobalVariables.graphScale.scale;
+    if (GlobalVariables.animationParams.speed > 0.0001) {
+      GlobalVariables.animationParams.speed = 0.0001;
+    }
+    if (GlobalVariables.animationParams.speed < 0.000005) {
+      GlobalVariables.animationParams.speed = 0.000005;
+    }
+    let wheelEvent = new WheelEvent('wheel', { deltaX: 0, deltaY: 100 });
+    CanvasEvents.onZoom(wheelEvent);
+  }
+  if (
+    GlobalVariables.trackingData.isZoomOutDone &&
+    !GlobalVariables.trackingData.isZoomInDone
+  ) {
+    GlobalVariables.animationParams.speed =
+      0.0001 / GlobalVariables.graphScale.scale;
+    if (GlobalVariables.animationParams.speed > 0.0001) {
+      GlobalVariables.animationParams.speed = 0.0001;
+    }
+    if (GlobalVariables.animationParams.speed < 0.000005) {
+      GlobalVariables.animationParams.speed = 0.000005;
+    }
+    let wheelEvent = new WheelEvent('wheel', { deltaX: 0, deltaY: -100 });
 
-function trackingValueChanged() {}
+    CanvasEvents.onZoom(wheelEvent);
+  }
+}
+function retract() {
+  if (GlobalVariables.graphScale.scale <= 1) {
+    GlobalVariables.trackingData.isRetractingDone = true;
+  }
+  if (!GlobalVariables.trackingData.isRetractingDone) {
+    GlobalVariables.animationParams.speed =
+      0.0001 / GlobalVariables.graphScale.scale;
+    if (GlobalVariables.animationParams.speed > 0.0001) {
+      GlobalVariables.animationParams.speed = 0.0001;
+    }
+    if (GlobalVariables.animationParams.speed < 0.000005) {
+      GlobalVariables.animationParams.speed = 0.000005;
+    }
+    let wheelEvent = new WheelEvent('wheel', { deltaX: 0, deltaY: 100 });
+    CanvasEvents.onZoom(wheelEvent);
+  }
+}
 function animate() {
   let lastTime = 0;
   function loop(timestamp: number) {
@@ -25,10 +108,10 @@ function animate() {
       trackingValueChanged();
     }
     if (
-      GlobalVariables.trackingData.index != -1 &&
-      !GlobalVariables.trackingData.isTrackingValueChanged
+      !GlobalVariables.trackingData.isRetractingDone &&
+      GlobalVariables.trackingData.index == -1
     ) {
-      setCenterTo(GlobalVariables.trackingData.index);
+      retract();
     }
     GlobalVariables.master.generateAndDrawVectorCollections();
 
@@ -51,6 +134,8 @@ function animate() {
 }
 async function imageReceiver(file: File) {
   stopAnimation();
+  GlobalVariables.imageChangeInit();
+  setUniforms();
   GlobalVariables.master = new Master();
   GlobalVariables.imageNumber++;
   clearInterval(GlobalVariables.grabageClearingHandle);
@@ -81,7 +166,6 @@ async function imageReceiver(file: File) {
   }
 }
 
-
 function startAnimation() {
   stopAnimation();
   animate();
@@ -89,7 +173,6 @@ function startAnimation() {
 function stopAnimation() {
   cancelAnimationFrame(GlobalVariables.animationHandler);
 }
-
 
 function main(canvas: HTMLCanvasElement) {
   GlobalVariables.init(canvas);
@@ -121,13 +204,19 @@ function main(canvas: HTMLCanvasElement) {
   });
 }
 function setTracking(index: number) {
-  GlobalVariables.trackingData.index = index;
+  if (index == -1) {
+    GlobalVariables.trackingData.isTrackingValueChanged = false;
+  }
+  else {
   GlobalVariables.trackingData.isTrackingValueChanged = true;
+  GlobalVariables.trackingData.isRetractingDone = false;
+  }
+  GlobalVariables.trackingData.index = index;
+  GlobalVariables.trackingData.isZoomOutDone = false;
+  GlobalVariables.trackingData.lastCenter = new Point(
+    (GlobalVariables.bounds.maxX + GlobalVariables.bounds.minX) / 2,
+    (GlobalVariables.bounds.maxY + GlobalVariables.bounds.minY) / 2
+  );
+  GlobalVariables.trackingData.t = 0;
 }
-export {
-  main,
-  imageReceiver,
-  stopAnimation,
-  setUniforms,
-  setTracking,
-};
+export { main, imageReceiver, stopAnimation, setUniforms, setTracking };

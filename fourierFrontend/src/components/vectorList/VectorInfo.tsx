@@ -13,8 +13,15 @@ import { setTracking } from '../../CanvasLogic/main';
 interface VectorInfoProps {
   color: number[]; // RGB values as a tuple
   index: number; // Vector number
+  onFocusingThis: (index: number) => void;
+  isFocused: boolean;
 }
-const VectorInfo: React.FC<VectorInfoProps> = ({ color, index }) => {
+const VectorInfo: React.FC<VectorInfoProps> = ({
+  color,
+  index,
+  isFocused,
+  onFocusingThis,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
   const [currState, setCurrState] = useState(-1);
   const rgbColor = `rgb(${Math.round(color[0] * 255)}, ${Math.round(
@@ -33,9 +40,13 @@ const VectorInfo: React.FC<VectorInfoProps> = ({ color, index }) => {
     setIsHovered(false);
   };
   const setSelectedState = (state: number) => {
-    GlobalVariables.master.setVectorState(index, state);
-    setTracking(index);
-    setCurrState(state);
+    if (state == currState) {
+      GlobalVariables.master.resetVectorState(index, state);
+      setCurrState(-1);
+    } else {
+      GlobalVariables.master.setVectorState(index, state);
+      setCurrState(state);
+    }
   };
   return (
     <div
@@ -118,9 +129,9 @@ const VectorInfo: React.FC<VectorInfoProps> = ({ color, index }) => {
               <div>
                 <CgTrack
                   onClick={() => {
-                    setSelectedState(3);
+                    onFocusingThis(index);
                   }}
-                  color={currState == 3 ? rgbColor : 'rgb(200,200,200)'}
+                  color={isFocused ? rgbColor : 'rgb(200,200,200)'}
                   size={18}
                 ></CgTrack>
               </div>

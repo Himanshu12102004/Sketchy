@@ -187,6 +187,30 @@ class Master {
       }
     }
   }
+  resetVectorState(index: number, state: number) {
+    if (state == 0) {
+      this.vectorCollection[index].lineAlpha = 1;
+      this.vectorCollection[index].vectorAlpha = 0.2;
+    } else if (state == 1) {
+      this.vectorCollection[index].lineAlpha = 1;
+      this.vectorCollection[index].vectorAlpha = 0.2;
+      for (let i = 0; i < this.vectorStates.length; i++) {
+        if (this.vectorStates[i] == -1) {
+          this.vectorCollection[i].lineAlpha = 1;
+          this.vectorCollection[i].vectorAlpha = 0.2;
+        }
+      }
+    } else if (state == 2) {
+      this.vectorCollection[index].lineAlpha = 1;
+      this.vectorCollection[index].vectorAlpha = 0.2;
+      for (let i = 0; i < this.vectorStates.length; i++) {
+        if (this.vectorStates[i] == -1) {
+          this.vectorCollection[i].lineAlpha = 1;
+          this.vectorCollection[i].vectorAlpha = 0.2;
+        }
+      }
+    }
+  }
   setVectorState(index: number, state: number) {
     this.vectorStates[index] = state;
     if (state == 0) {

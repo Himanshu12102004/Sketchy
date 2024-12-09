@@ -1,9 +1,9 @@
 import GlobalVariables from '../utils/GlobalVariable';
+import Point from '../wrorldComponents/Point';
 
-function setCenterTo(trackedVector: number) {
-  let lines = GlobalVariables.master.vectorCollection[trackedVector].lines;
-  let centerX = lines[lines.length - 3];
-  let centerY = lines[lines.length - 2];
+function setCenterTo(point: Point) {
+  let centerX = point.x;
+  let centerY = point.y;
   GlobalVariables.animationParams.speed =
     0.0001 / GlobalVariables.graphScale.scale;
   if (GlobalVariables.animationParams.speed > 0.0001) {

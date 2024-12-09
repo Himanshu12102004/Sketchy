@@ -1,6 +1,8 @@
 import Master from './Master';
 import SVG from '../svgComputation/calculatePoint';
 import VectorCollection from '../wrorldComponents/VectorCollection';
+import Point from '../wrorldComponents/Point';
+import { setUniforms } from '../main';
 
 class GlobalVariables {
   static bounds = { maxX: 0, minX: 0, maxY: 0, minY: 0 };
@@ -30,34 +32,28 @@ class GlobalVariables {
   static imageNumber: number;
   static trackingData = {
     index: -1,
+    isRetractingDone: false,
     isTrackingValueChanged: false,
     isZoomOutDone: false,
+    lastCenter: new Point(0, 0),
+    isZoomInDone: false,
+    t: 0,
   };
   static animationParams = {
     speed: 0.0001,
     t: 0,
   };
-  static init(canvas: HTMLCanvasElement) {
-    GlobalVariables.canvasParent = document.querySelector('#canvas_parent')!;
-    GlobalVariables.screenDimensions.height =
-      GlobalVariables.canvasParent.clientHeight;
-    GlobalVariables.screenDimensions.width =
-      GlobalVariables.canvasParent.clientWidth;
-    GlobalVariables.maxVectorWidth = 3;
-    GlobalVariables.numberOfVectors = 100;
-    GlobalVariables.widthDampingFactor = 0.8;
-    GlobalVariables.triangleToRectWidthRatio = 4;
-    GlobalVariables.triangleAngle = 40;
-    GlobalVariables.samplePerUnitLength = 1;
-    GlobalVariables.grabageClearingHandle = 0;
+  static imageChangeInit() {
     GlobalVariables.trackingData = {
+      isRetractingDone:false,
       index: -1,
       isTrackingValueChanged: false,
       isZoomOutDone: false,
+      lastCenter: new Point(0, 0),
+      isZoomInDone: false,
+      t: 0,
     };
-    GlobalVariables.grabageClearingTime =
-      1 / GlobalVariables.animationParams.speed;
-    GlobalVariables.imageNumber = 0;
+    GlobalVariables.graphScale.scale = 1;
     GlobalVariables.bounds = {
       maxX:
         GlobalVariables.screenDimensions.width /
@@ -72,6 +68,23 @@ class GlobalVariables {
         -GlobalVariables.screenDimensions.height /
         (2 * GlobalVariables.graphScale.scale),
     };
+  }
+  static init(canvas: HTMLCanvasElement) {
+    GlobalVariables.canvasParent = document.querySelector('#canvas_parent')!;
+    GlobalVariables.screenDimensions.height =
+      GlobalVariables.canvasParent.clientHeight;
+    GlobalVariables.screenDimensions.width =
+      GlobalVariables.canvasParent.clientWidth;
+    GlobalVariables.maxVectorWidth = 3;
+    GlobalVariables.numberOfVectors = 100;
+    GlobalVariables.widthDampingFactor = 0.8;
+    GlobalVariables.triangleToRectWidthRatio = 4;
+    GlobalVariables.triangleAngle = 40;
+    GlobalVariables.samplePerUnitLength = 1;
+    GlobalVariables.grabageClearingHandle = 0;
+    GlobalVariables.grabageClearingTime =
+      1 / GlobalVariables.animationParams.speed;
+    GlobalVariables.imageNumber = 0;
     GlobalVariables.canvas = canvas;
     const renderingContext = canvas.getContext('webgl2', { antialias: true });
     if (!renderingContext) {
@@ -88,6 +101,7 @@ class GlobalVariables {
       GlobalVariables.screenDimensions.width,
       GlobalVariables.screenDimensions.height
     );
+    GlobalVariables.imageChangeInit();
   }
 }
 export default GlobalVariables;
