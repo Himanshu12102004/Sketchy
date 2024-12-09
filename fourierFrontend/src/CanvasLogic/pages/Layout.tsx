@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import CanvasParent from '../../components/Canvas/CanvasParent';
 import SideBar from '../../components/sideBar/SideBar';
 import {
-  CaretDoubleLeft,
-  CaretDoubleRight,
   CaretLeft,
   CaretRight,
 } from 'phosphor-react';
@@ -11,21 +9,20 @@ import {
 const MemoizedCanvasParent = React.memo(CanvasParent);
 
 function Layout() {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);
 
     const resizeEvent = new CustomEvent('sidebar');
     window.dispatchEvent(resizeEvent);
   };
-
   return (
     <div className="flex h-screen">
       <div
         id="canvas_parent"
         className={`transition-all duration-200 ${
-          isSidebarVisible ? 'w-4/5' : 'w-full'
+          isSidebarVisible ? 'w-3/4' : 'w-full'
         } relative`}
       >
         <MemoizedCanvasParent />
@@ -47,7 +44,7 @@ function Layout() {
       </div>
       <div
         className={`transition-all duration-200 bg-gray-100 ${
-          isSidebarVisible ? 'w-1/5' : 'w-0'
+          isSidebarVisible ? 'w-1/4' : 'w-0'
         } overflow-hidden`}
       >
         <SideBar />

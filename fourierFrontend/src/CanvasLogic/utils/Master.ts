@@ -1,16 +1,18 @@
 import { svgPathProperties } from 'svg-path-properties';
-import SVG from './svgComputation/calculatePoint';
-import VectorCollection from './wrorldComponents/VectorCollection';
-import Point from './wrorldComponents/Point';
+import SVG from '../svgComputation/calculatePoint';
+import VectorCollection from '../wrorldComponents/VectorCollection';
+import Point from '../wrorldComponents/Point';
 import svgPath from 'svgpath';
-
 class Master {
   properties: any;
   componentSVGs: SVG[];
   vectorCollection: VectorCollection[];
+
+  vectorStates: number[];
   constructor() {
     this.componentSVGs = [];
     this.vectorCollection = [];
+    this.vectorStates = [];
   }
   private static readFile(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -34,7 +36,7 @@ class Master {
         throw new Error('The path element does not contain a "d" attribute.');
       }
       const svgComponents = Master.splitSubPaths(pathData);
-      console.log(svgComponents)
+      console.log(svgComponents);
       for (let j = 0; j < svgComponents.length; j++) {
         this.componentSVGs.push(new SVG(svgComponents[j]));
       }
@@ -68,8 +70,8 @@ class Master {
   static splitSubPaths(svgPath: string): string[] {
     // let convertedPath = Master.convertRelativeToAbsolute(svgPath);
     // console.log(convertedPath);
-    if(svgPath[0]=='m'){
-      return [svgPath]
+    if (svgPath[0] == 'm') {
+      return [svgPath];
     }
     const commands = svgPath.match(/([M][^M]*)/g);
     return commands ? commands.map((cmd) => cmd.trim()) : [];
@@ -133,6 +135,7 @@ class Master {
         );
         count++;
       }
+      this.vectorStates.push(-1);
     }
     acc.divide(count);
     console.log(acc);
@@ -156,6 +159,66 @@ class Master {
     this.vectorCollection.forEach((elem) => {
       elem.generateAndDraw();
     });
+  }
+  getVectorColor() {
+    let vectors: number[][];
+    vectors = [];
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      vectors[i] = [
+        this.vectorCollection[i].vectorColor[0],
+        this.vectorCollection[i].vectorColor[1],
+        this.vectorCollection[i].vectorColor[2],
+      ];
+    }
+    return vectors;
+  }
+  restoreOpacity() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].restoreOpacity();
+    }
+  }
+  changeOpacityOf(indices: number[]) {
+    const indexSet = new Set(indices);
+    console.log(indexSet);
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      if (!indexSet.has(i)) {
+        console.log('dfdf');
+        this.vectorCollection[i].dropOpacity();
+      }
+    }
+  }
+  setVectorState(index: number, state: number) {
+    this.vectorStates[index] = state;
+    if (state == 0) {
+      this.vectorCollection[index].lineAlpha = 0;
+      this.vectorCollection[index].vectorAlpha = 0;
+      return;
+    }
+    if (state == 1) {
+      this.vectorCollection[index].lineAlpha = 1;
+      this.vectorCollection[index].vectorAlpha = 1;
+      for (let i = 0; i < this.vectorStates.length; i++) {
+        if (this.vectorStates[i] == -1) {
+          this.vectorCollection[i].lineAlpha = 0;
+          this.vectorCollection[i].vectorAlpha = 0;
+        }
+      }
+    }
+    if (state == 2) {
+      this.vectorCollection[index].lineAlpha = 1;
+      this.vectorCollection[index].vectorAlpha = 1;
+      for (let i = 0; i < this.vectorStates.length; i++) {
+        if (this.vectorStates[i] == -1) {
+          this.vectorCollection[i].lineAlpha = 0.3;
+          this.vectorCollection[i].vectorAlpha = 0.1;
+        }
+      }
+    }
+  }
+  disposeGarbage() {
+    for (let i = 0; i < this.vectorCollection.length; i++) {
+      this.vectorCollection[i].disposeGarbage();
+    }
   }
 }
 

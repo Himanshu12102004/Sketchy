@@ -1,4 +1,4 @@
-import GlobalVariables from '../GlobalVariable';
+import GlobalVariables from '../utils/GlobalVariable';
 import createVao from '../helpers/createVao';
 import updateVao from '../helpers/updateVao';
 import Point from './Point';
@@ -17,15 +17,21 @@ class VectorCollection {
   vectorColor: number[];
   calledForTheFirstTime: boolean;
   lineColorLocation: WebGLUniformLocation | null;
+  vectorAlpha: number;
+  lineAlpha: number;
   vectorColorLocation: WebGLUniformLocation | null;
+  lineAlphaLocation: WebGLUniformLocation | null;
+  vectorAlphaLocation: WebGLUniformLocation | null;
   constructor() {
     this.vectors = [];
     this.vectorVao = null;
     this.lines = [];
     this.lineVao = null;
-    this.lineColor = [Math.random(), Math.random(), Math.random(), 1];
-    this.vectorColor = [Math.random(), Math.random(), Math.random(), 1];
+    this.vectorColor = [Math.random(), Math.random(), Math.random()];
+    this.lineColor = this.vectorColor;
     this.calledForTheFirstTime = true;
+    this.vectorAlpha = 0.2;
+    this.lineAlpha = 1;
     this.lineColorLocation = GlobalVariables.gl.getUniformLocation(
       GlobalVariables.program,
       'lineColor'
@@ -34,6 +40,16 @@ class VectorCollection {
       GlobalVariables.program,
       'vectorColor'
     );
+    this.lineAlphaLocation = GlobalVariables.gl.getUniformLocation(
+      GlobalVariables.program,
+      'lAlpha'
+    );
+    this.vectorAlphaLocation = GlobalVariables.gl.getUniformLocation(
+      GlobalVariables.program,
+      'vAlpha'
+    );
+    GlobalVariables.gl.uniform1f(this.vectorAlphaLocation, 0.1);
+    GlobalVariables.gl.uniform1f(this.lineAlphaLocation, 1);
   }
   computeCn(n: number, sampledPoints: SampledPoint[]): Point {
     let Cn = new Point(0, 0);
@@ -199,17 +215,41 @@ class VectorCollection {
     let vertexPoints = this.generateVectorPoints();
     this.setVao(vertexPoints);
     this.setLineVao(this.lines);
-    GlobalVariables.gl.uniform4fv(
+    GlobalVariables.gl.uniform1f(this.vectorAlphaLocation, this.vectorAlpha);
+    GlobalVariables.gl.uniform1f(this.lineAlphaLocation, this.lineAlpha);
+    GlobalVariables.gl.uniform3fv(
       this.vectorColorLocation,
       new Float32Array(this.vectorColor)
     );
-    GlobalVariables.gl.uniform4fv(
+    GlobalVariables.gl.uniform3fv(
       this.lineColorLocation,
       new Float32Array(this.lineColor)
     );
     this.drawLines();
     this.draw();
   }
-}
 
+  dropOpacity() {
+    this.vectorColor[3] = 0.0;
+    this.lineColor = this.vectorColor;
+  }
+  restoreOpacity() {
+    this.vectorColor[3] = 1;
+    this.lineColor = this.vectorColor;
+  }
+  disposeGarbage() {
+    let index = 2;
+    for (let i = 2; i < this.lines.length; i += 3) {
+      if (
+        this.lines[i] + GlobalVariables.grabageClearingTime >=
+        performance.now()
+      ) {
+        index = i;
+        break;
+      }
+    }
+
+    this.lines = this.lines.slice(index + 1);
+  }
+}
 export default VectorCollection;

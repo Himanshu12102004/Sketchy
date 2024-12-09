@@ -1,4 +1,4 @@
-import GlobalVariables from '../GlobalVariable';
+import GlobalVariables from '../utils/GlobalVariable';
 
 class Point {
   x: number;

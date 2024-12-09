@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
-import SVG from '../../CanvasLogic/svgComputation/calculatePoint';
+import React, { useEffect, useState } from 'react';
 import { imageReceiver } from '../../CanvasLogic/main';
+import VectorList from '../vectorList/VectorList';
+import Welcome from '../welocme/Welcome';
+// import CustomSlider from '../slider/slider';
 
 function SideBar() {
+  const defaultImage = 'react.svg'; // Path to your default image
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
-
+  const [previewUrl, setPreviewUrl] = useState<string>(defaultImage);
+  const [imageNumber, setImageNumber] = useState(0);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      setDroppedFiles(Array.from(files));
+      const fileArray = Array.from(files);
+      setDroppedFiles(fileArray);
+      setPreviewUrl(URL.createObjectURL(fileArray[0]));
+      setImageNumber(1 + imageNumber);
     }
   };
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
-    setDroppedFiles(Array.from(files));
+    const fileArray = Array.from(files);
+    setDroppedFiles(fileArray);
+    setPreviewUrl(URL.createObjectURL(fileArray[0]));
   };
-
+  useEffect(() => {
+    if (droppedFiles.length > 0) handleUpload();
+  }, [droppedFiles]);
   const handleUpload = () => {
     if (droppedFiles.length > 0) {
       imageReceiver(droppedFiles[0]);
@@ -29,50 +38,61 @@ function SideBar() {
       alert('Please select or drop a file first.');
     }
   };
-
   return (
-    <div className="w-full h-full bg-gray-100 p-4 border-gray-300 flex flex-col justify-center items-center">
-      <p className="text-gray-600 mb-4 text-center">
-        Upload any SVG that you draw:
-      </p>
+    <div
+      className="px-5 h-screen overflow-y-auto bg-gray-100 text-gray-700"
+      style={{ fontFamily: 'Roboto, sans-serif' }}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      <Welcome />
+      <div className="w-full pt-3">
+        <hr />
+        <div className="text-lg font-medium mb-2 pt-2 pb-1">
+          Selected Image:
+        </div>
+        <div className="flex justify-center items-center h-52 border border-gray-300 bg-white rounded-md">
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Selected"
+              className="h-full object-contain"
+            />
+          ) : (
+            <p className="text-gray-500">No image selected</p>
+          )}
+        </div>
+        <div className="mt-4">
+          <p className="mb-2 text-sm text-center text-gray-500">
+            Drag and drop an image or select one to start drawing.
+          </p>
+          <div className="flex flex-col items-center pb-5">
+            <label
+              htmlFor="fileInput"
+              className="cursor-pointer text-white bg-blue-500 py-2 px-3 rounded-md shadow-md hover:bg-blue-600 transition duration-200 text-center mb-2 text-sm"
+            >
+              Browse File and Draw
+            </label>
+          </div>
+          <input
+            id="fileInput"
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
 
-      <div
-        className="w-full h-64 bg-gray-200 border-2 border-dashed border-gray-400 flex flex-col justify-center items-center"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        <label
-          htmlFor="fileInput"
-          className="cursor-pointer text-white bg-blue-500 py-2 px-4 rounded-md shadow-md hover:bg-blue-600 transition duration-200"
-        >
-          Browse File
-        </label>
-
-        <input
-          id="fileInput"
-          type="file"
-          multiple
-          onChange={handleFileSelect}
-          className="hidden"
-        />
-
-        {droppedFiles.length > 0 && (
-          <ul className="space-y-2 mt-4">
-            {droppedFiles.map((file, index) => (
-              <li key={index} className="text-gray-800">
-                {file.name}
-              </li>
-            ))}
-          </ul>
-        )}
+        <hr />
+        {/* <CustomSlider
+          min={0}
+          max={1}
+          defaultValue={0.2}
+          onChange={(n) => {
+            console.log(n);
+          }}
+        ></CustomSlider> */}
+        <VectorList imageNumber={imageNumber} />
       </div>
-
-      <button
-        onClick={handleUpload}
-        className="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-md shadow-md hover:bg-green-600 transition duration-200"
-      >
-        Upload
-      </button>
     </div>
   );
 }

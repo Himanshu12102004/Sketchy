@@ -1,6 +1,6 @@
 import { svgPathProperties } from 'svg-path-properties';
 import Point from '../wrorldComponents/Point';
-import GlobalVariables from '../GlobalVariable';
+import GlobalVariables from '../utils/GlobalVariable';
 interface SampledPoint {
   t: number;
   x: number;
@@ -25,7 +25,7 @@ class SVG {
   samplePath() {
     let numPoints = Math.max(
       this.totalLength / GlobalVariables.samplePerUnitLength,
-      100
+      500
     );
     const incInT = 1 / numPoints;
     const points: SampledPoint[] = [];
@@ -58,5 +58,4 @@ class SVG {
     this.sampledPoints = points;
   }
 }
-
 export default SVG;

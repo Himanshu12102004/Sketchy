@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { main } from '../../CanvasLogic/main';
 import Canvas from './Canvas';
-
 const CanvasParent: React.FC = () => {
   let canva: HTMLCanvasElement;
   function getCanvas(canvas: HTMLCanvasElement) {
@@ -12,5 +11,4 @@ const CanvasParent: React.FC = () => {
   });
   return <Canvas onCanvasReady={getCanvas} />;
 };
-
 export default CanvasParent;

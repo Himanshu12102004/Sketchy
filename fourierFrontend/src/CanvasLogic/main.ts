@@ -1,25 +1,13 @@
-import CanvasEvents from './CanvasEvents';
-import GlobalVariables from './GlobalVariable';
-import { shaderCompiler } from './helpers/compileShaders';
+import CanvasEvents from './utils/CanvasEvents';
+import GlobalVariables from './utils/GlobalVariable';
 import { createProgram } from './helpers/createProgram';
-import Master from './Master';
-import { fragmentShader, vertexShader } from './shaders';
-function compileShader(
-  vertexShaderSource: string,
-  fragmentShaderSource: string
-) {
-  let vertexShader = shaderCompiler(
-    vertexShaderSource,
-    GlobalVariables.gl.VERTEX_SHADER,
-    GlobalVariables.gl
-  );
-  let fragmentShader = shaderCompiler(
-    fragmentShaderSource,
-    GlobalVariables.gl.FRAGMENT_SHADER,
-    GlobalVariables.gl
-  );
-  return { vertexShader, fragmentShader };
-}
+import Master from './utils/Master';
+import { fragmentShader, vertexShader } from './utils/shaders';
+import { compileShader } from './utils/compileShader';
+import { setCenterTo, setUniforms } from './canvasUtils/canvasUtils';
+import { convertAndProcessImage, fetchDefaultSVG, finalizeProcessing, processSvg } from './canvasUtils/imageProcessing';
+
+function trackingValueChanged() {}
 function animate() {
   let lastTime = 0;
   function loop(timestamp: number) {
@@ -33,7 +21,25 @@ function animate() {
       GlobalVariables.animationParams.t = 0;
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    if (GlobalVariables.trackingData.isTrackingValueChanged) {
+      trackingValueChanged();
+    }
+    if (
+      GlobalVariables.trackingData.index != -1 &&
+      !GlobalVariables.trackingData.isTrackingValueChanged
+    ) {
+      setCenterTo(GlobalVariables.trackingData.index);
+    }
     GlobalVariables.master.generateAndDrawVectorCollections();
+
+    let timeElapseLoc = GlobalVariables.gl.getUniformLocation(
+      GlobalVariables.program,
+      'timeElapse'
+    );
+    GlobalVariables.gl.uniform1f(
+      timeElapseLoc,
+      1 / GlobalVariables.animationParams.speed
+    );
     let loc = GlobalVariables.gl.getUniformLocation(
       GlobalVariables.program,
       'currTime'
@@ -43,14 +49,39 @@ function animate() {
   }
   loop(0);
 }
-function imageReceiver(file: File) {
+async function imageReceiver(file: File) {
   stopAnimation();
   GlobalVariables.master = new Master();
-  GlobalVariables.master.fromFile(file).then(() => {
-    GlobalVariables.master.samplePath();
-    startAnimation();
+  GlobalVariables.imageNumber++;
+  clearInterval(GlobalVariables.grabageClearingHandle);
+  const isSvg = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = reader.result as string;
+      resolve(
+        content.trim().startsWith('<svg') ||
+          content.includes('xmlns="http://www.w3.org/2000/svg"')
+      );
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
   });
+
+  if (isSvg) {
+    await processSvg(file);
+    finalizeProcessing();
+    startAnimation();
+  } else {
+    let svgFile = await convertAndProcessImage(file);
+    if (svgFile) {
+      await processSvg(svgFile);
+      finalizeProcessing();
+      startAnimation();
+    }
+  }
 }
+
+
 function startAnimation() {
   stopAnimation();
   animate();
@@ -58,34 +89,8 @@ function startAnimation() {
 function stopAnimation() {
   cancelAnimationFrame(GlobalVariables.animationHandler);
 }
-function setUniforms() {
-  let maxXLoc = GlobalVariables.gl.getUniformLocation(
-    GlobalVariables.program,
-    'maxX'
-  );
-  let maxYLoc = GlobalVariables.gl.getUniformLocation(
-    GlobalVariables.program,
-    'maxY'
-  );
-  let minXLoc = GlobalVariables.gl.getUniformLocation(
-    GlobalVariables.program,
-    'minX'
-  );
-  let minYLoc = GlobalVariables.gl.getUniformLocation(
-    GlobalVariables.program,
-    'minY'
-  );
-  GlobalVariables.gl.uniform1f(maxXLoc, GlobalVariables.bounds.maxX);
-  GlobalVariables.gl.uniform1f(maxYLoc, GlobalVariables.bounds.maxY);
-  GlobalVariables.gl.uniform1f(minXLoc, GlobalVariables.bounds.minX);
-  GlobalVariables.gl.uniform1f(minYLoc, GlobalVariables.bounds.minY);
-}
-async function fetchDefaultSVG(): Promise<File> {
-  const response = await fetch('react.svg');
-  const svgContent = await response.text();
-  const file = new File([svgContent], 'default.svg', { type: 'image/svg+xml' });
-  return file;
-}
+
+
 function main(canvas: HTMLCanvasElement) {
   GlobalVariables.init(canvas);
   CanvasEvents.addEvents();
@@ -103,17 +108,26 @@ function main(canvas: HTMLCanvasElement) {
   fetchDefaultSVG().then((file) => {
     GlobalVariables.master.fromFile(file).then(() => {
       GlobalVariables.master.samplePath();
+      const vectorsCreatedEvent = new CustomEvent('vectorsCreated', {
+        detail: { vectors: GlobalVariables.master.getVectorColor() },
+      });
+      window.dispatchEvent(vectorsCreatedEvent);
+      GlobalVariables.grabageClearingHandle = setInterval(() => {
+        GlobalVariables.master.disposeGarbage();
+      }, GlobalVariables.grabageClearingTime);
+
       animate();
     });
   });
 }
-// const img = new Image();
-// img.src = '../public/1.png';
-// img.onload = () => {
-//   console.log(img);
-//   const svgString = ImageTracer.imageToSVG(img, {});
-//   console.log(svgString); // The SVG output
-//   document.body.insertAdjacentElement('afterbegin', img); // Append the SVG to the document
-// };
-
-export { main, imageReceiver, stopAnimation, setUniforms };
+function setTracking(index: number) {
+  GlobalVariables.trackingData.index = index;
+  GlobalVariables.trackingData.isTrackingValueChanged = true;
+}
+export {
+  main,
+  imageReceiver,
+  stopAnimation,
+  setUniforms,
+  setTracking,
+};

@@ -1,4 +1,4 @@
-import GlobalVariables from '../GlobalVariable';
+import GlobalVariables from '../utils/GlobalVariable';
 import Point from './Point';
 class Vector {
   magnitude: number;
@@ -12,7 +12,7 @@ class Vector {
     this.phi = phi;
     this.n = n;
     this.tnp = 2 * this.n * Math.PI;
-    this.width = Math.min(0.05 * magnitude,GlobalVariables.maxVectorWidth);
+    this.width = Math.min(0.05 * magnitude, GlobalVariables.maxVectorWidth);
     this.triangleWidth = GlobalVariables.triangleToRectWidthRatio * this.width;
   }
   calcPointsOfRect(pt1: Point, pt2: Point, pt3: Point, vertexArray: number[]) {

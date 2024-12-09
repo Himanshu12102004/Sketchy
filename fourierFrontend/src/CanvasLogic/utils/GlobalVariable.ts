@@ -1,6 +1,6 @@
 import Master from './Master';
-import SVG from './svgComputation/calculatePoint';
-import VectorCollection from './wrorldComponents/VectorCollection';
+import SVG from '../svgComputation/calculatePoint';
+import VectorCollection from '../wrorldComponents/VectorCollection';
 
 class GlobalVariables {
   static bounds = { maxX: 0, minX: 0, maxY: 0, minY: 0 };
@@ -25,6 +25,14 @@ class GlobalVariables {
   static animationHandler: number;
   static samplePerUnitLength: number;
   static master: Master;
+  static grabageClearingTime: number;
+  static grabageClearingHandle: number;
+  static imageNumber: number;
+  static trackingData = {
+    index: -1,
+    isTrackingValueChanged: false,
+    isZoomOutDone: false,
+  };
   static animationParams = {
     speed: 0.0001,
     t: 0,
@@ -35,13 +43,21 @@ class GlobalVariables {
       GlobalVariables.canvasParent.clientHeight;
     GlobalVariables.screenDimensions.width =
       GlobalVariables.canvasParent.clientWidth;
-    console.log(GlobalVariables.screenDimensions);
     GlobalVariables.maxVectorWidth = 3;
     GlobalVariables.numberOfVectors = 100;
     GlobalVariables.widthDampingFactor = 0.8;
     GlobalVariables.triangleToRectWidthRatio = 4;
     GlobalVariables.triangleAngle = 40;
     GlobalVariables.samplePerUnitLength = 1;
+    GlobalVariables.grabageClearingHandle = 0;
+    GlobalVariables.trackingData = {
+      index: -1,
+      isTrackingValueChanged: false,
+      isZoomOutDone: false,
+    };
+    GlobalVariables.grabageClearingTime =
+      1 / GlobalVariables.animationParams.speed;
+    GlobalVariables.imageNumber = 0;
     GlobalVariables.bounds = {
       maxX:
         GlobalVariables.screenDimensions.width /

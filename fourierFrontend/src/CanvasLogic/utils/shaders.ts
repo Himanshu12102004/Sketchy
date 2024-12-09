@@ -23,15 +23,19 @@ precision mediump float;
 out vec4 color;
 in float timestamp;
 uniform float currTime;
-uniform vec4 lineColor;
-uniform vec4 vectorColor; 
+uniform vec3 lineColor;
+uniform vec3 vectorColor; 
+uniform float lAlpha;
+uniform float vAlpha;
+uniform float timeElapse;
 void main(){
 if(timestamp>0.0){
         float age = currTime - timestamp;
-        float alpha = 1.0 - clamp(age / 10000.0, 0.0, 1.0);
-        color = vec4(lineColor[0], lineColor[1], lineColor[2],1.0);
+        float alpha = lAlpha - clamp(age / timeElapse, 0.0, lAlpha);
+        color = vec4(lineColor[0], lineColor[1], lineColor[2],alpha);
+        // color = vec4(1, 1, 1,1.0);
 }
 else
-  color=vec4(vectorColor[0],vectorColor[1],vectorColor[2],vectorColor[3]*0.001);
+  color=vec4(vectorColor[0],vectorColor[1],vectorColor[2],0);
 }`;
 export { vertexShader, fragmentShader };

@@ -1,5 +1,5 @@
 import GlobalVariables from './GlobalVariable';
-import { setUniforms } from './main';
+import { setUniforms } from '../main';
 
 class CanvasEvents {
   static isDragging: boolean;
@@ -11,12 +11,12 @@ class CanvasEvents {
       CanvasEvents.onResize();
     });
     window.addEventListener('sidebar', () => {
-      this.setIntervalController = setInterval(() => {
+      CanvasEvents.setIntervalController = setInterval(() => {
         CanvasEvents.onResize();
-      }, 5);
+      }, 2);
     });
     GlobalVariables.canvasParent.addEventListener('transitionend', () => {
-      clearInterval(this.setIntervalController);
+      clearInterval(CanvasEvents.setIntervalController);
     });
 
     GlobalVariables.canvas.addEventListener('wheel', (e) => {
