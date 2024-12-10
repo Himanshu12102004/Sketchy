@@ -26,7 +26,7 @@ let uploadedUrls = [
 ];
 import { CaretLeft } from 'phosphor-react';
 import React from 'react';
-import SingleImage from './singleImage';
+import SingleImage from './SingleImage';
 interface props {
   onImageSelect: (url: string) => void;
   toggleLibrary: () => void;

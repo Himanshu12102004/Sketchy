@@ -3,7 +3,7 @@ import { imageReceiver } from '../../CanvasLogic/main';
 import VectorList from '../vectorList/VectorList';
 import Welcome from '../welocme/Welcome';
 import Settings from '../entireDrawingSettings/Settings';
-import ImagesGrid from './imagesGrid';
+import ImagesGrid from './ImagesGrid';
 function SideBar(props: { imageUploadShowOverlay: () => void }) {
   const defaultImage = 'default.svg'; // Path to your default image
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);

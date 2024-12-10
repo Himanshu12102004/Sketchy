@@ -12,12 +12,14 @@ function Layout() {
   );
   const [showOverlay, setShowOverlay] = useState(true);
   const [overlayHead, setOverlayHead] = useState('Please Wait!');
+  const [isErr, setIsErr] = useState(false);
   const [overlaySubHead, setOverlaySubHead] = useState(
     'We are processing your image.'
   );
   const handleImageUpload = () => {
     setOverlayHead('Please Wait!');
     setOverlaySubHead('We are processing your image.');
+    setIsErr(false);
     setShowOverlay(true);
   };
   useEffect(() => {
@@ -26,6 +28,7 @@ function Layout() {
     };
 
     const handleSvgError = () => {
+      setIsErr(true);
       setOverlayHead('Error!');
       setOverlaySubHead('Some error occured while processing your image.');
       setTimeout(() => {
@@ -73,7 +76,7 @@ function Layout() {
         } relative`}
       >
         {showOverlay && (
-          <Overlay head={overlayHead} subHead={overlaySubHead} isErr={false} />
+          <Overlay head={overlayHead} subHead={overlaySubHead} isErr={isErr} />
         )}{' '}
         <MemoizedCanvasParent />
         <button
