@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { RiArrowDownSLine } from 'react-icons/ri';
 import Slider from '../slider/Slider';
 import GlobalVariables from '../../CanvasLogic/utils/GlobalVariable';
-import ColorPicker from './colourPicker';
+import ColorPicker from './ColourPicker';
 interface rgb {
   r: number;
   g: number;

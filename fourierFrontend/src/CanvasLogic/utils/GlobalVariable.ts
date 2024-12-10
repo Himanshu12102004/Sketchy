@@ -76,7 +76,7 @@ class GlobalVariables {
     };
   }
   static init(canvas: HTMLCanvasElement) {
-    GlobalVariables.alpha.defaultLineAlpha = 1;
+    GlobalVariables.alpha.defaultLineAlpha = 1.2;
     GlobalVariables.alpha.defaultVectorAlpha = 0.0;
     GlobalVariables.canvasParent = document.querySelector('#canvas_parent')!;
     GlobalVariables.screenDimensions.height =
