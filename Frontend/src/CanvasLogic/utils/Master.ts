@@ -37,7 +37,6 @@ class Master {
         throw new Error('The path element does not contain a "d" attribute.');
       }
       const svgComponents = Master.splitSubPaths(pathData);
-      console.log(svgComponents);
       for (let j = 0; j < svgComponents.length; j++) {
         this.componentSVGs.push(new SVG(svgComponents[j]));
       }
@@ -139,7 +138,6 @@ class Master {
       this.vectorStates.push(-1);
     }
     acc.divide(count);
-    console.log(acc);
     for (let i = 0; i < this.componentSVGs.length; i++) {
       for (let j = 0; j < this.componentSVGs[i].sampledPoints.length; j++) {
         this.componentSVGs[i].sampledPoints[j].x =
@@ -183,10 +181,8 @@ class Master {
   }
   changeOpacityOf(indices: number[]) {
     const indexSet = new Set(indices);
-    console.log(indexSet);
     for (let i = 0; i < this.vectorCollection.length; i++) {
       if (!indexSet.has(i)) {
-        console.log('dfdf');
         this.vectorCollection[i].dropOpacity();
       }
     }

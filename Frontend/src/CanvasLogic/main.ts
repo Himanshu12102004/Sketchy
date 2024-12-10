@@ -94,7 +94,6 @@ function retract() {
 function animate() {
   let lastTime = 0;
   function loop(timestamp: number) {
-    // console.log("F")
     let gl = GlobalVariables.gl;
     const delta = timestamp - lastTime;
     lastTime = timestamp;
