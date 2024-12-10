@@ -16,15 +16,14 @@ export default function Settings() {
     if (e.target.checked) GlobalVariables.master.setMonochromeColor();
     else GlobalVariables.master.restoreColors();
   }
-  window.addEventListener("vectorsCreated",()=>{
+  window.addEventListener('vectorsCreated', () => {
     setIsMonochrome(false);
-  })
+  });
   function colorChanged(rgb: rgb) {
     GlobalVariables.monochromeColour = rgb;
     GlobalVariables.master.setMonochromeColor();
   }
   const toggleExpansion = () => setIsExpanded(!isExpanded);
-
 
   return (
     <div className="w-80 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">

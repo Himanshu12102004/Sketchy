@@ -29,7 +29,10 @@ class GlobalVariables {
   static grabageClearingTime: number;
   static grabageClearingHandle: number;
   static imageNumber: number;
-  static alpha= { defaultVectorAlpha: 0.0,defaultLineAlpha: 1 };
+  static touchZoomData = {
+    initialDistance: 0,
+  };
+  static alpha = { defaultVectorAlpha: 0.0, defaultLineAlpha: 1 };
   static monochromeColour = {
     r: 255,
     g: 255,

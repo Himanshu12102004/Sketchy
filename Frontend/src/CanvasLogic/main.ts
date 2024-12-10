@@ -157,12 +157,14 @@ async function imageReceiver(file: File) {
     finalizeProcessing();
     startAnimation();
   } else {
-    let svgFile = await convertAndProcessImage(file);
-    if (svgFile) {
-      await processSvg(svgFile);
-      finalizeProcessing();
-      startAnimation();
-    }
+    let errorEvent = new CustomEvent('svgError');
+    window.dispatchEvent(errorEvent);
+    // let svgFile = await convertAndProcessImage(file);
+    // if (svgFile) {
+    //   await processSvg(svgFile);
+    //   finalizeProcessing();
+    //   startAnimation();
+    // }
   }
 }
 
@@ -171,6 +173,7 @@ function startAnimation() {
   animate();
 }
 function stopAnimation() {
+  GlobalVariables.gl.clear(GlobalVariables.gl.COLOR_BUFFER_BIT);
   cancelAnimationFrame(GlobalVariables.animationHandler);
 }
 
@@ -195,6 +198,11 @@ function main(canvas: HTMLCanvasElement) {
         detail: { vectors: GlobalVariables.master.getVectorColor() },
       });
       window.dispatchEvent(vectorsCreatedEvent);
+
+      const readyToGoEvent = new CustomEvent('readyToGo', {
+        detail: { vectors: GlobalVariables.master.getVectorColor() },
+      });
+      window.dispatchEvent(readyToGoEvent);
       GlobalVariables.grabageClearingHandle = setInterval(() => {
         GlobalVariables.master.disposeGarbage();
       }, GlobalVariables.grabageClearingTime);

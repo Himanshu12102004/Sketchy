@@ -21,7 +21,7 @@ async function convertAndProcessImage(file: File) {
     if (!response.ok) {
       const event = new CustomEvent('someError');
       window.dispatchEvent(event);
-      return fetchDefaultSVG("error.svg")
+      return fetchDefaultSVG('error.svg');
     }
     const svgContent = await response.json();
     const blob = new Blob([svgContent.message], { type: 'image/svg+xml' });
@@ -42,11 +42,15 @@ function finalizeProcessing() {
   });
   window.dispatchEvent(vectorsCreatedEvent);
 
+  const readyToGoEvent = new CustomEvent('readyToGo', {
+    detail: { vectors: GlobalVariables.master.getVectorColor() },
+  });
+  window.dispatchEvent(readyToGoEvent);
   GlobalVariables.grabageClearingHandle = setInterval(() => {
     GlobalVariables.master.disposeGarbage();
   }, GlobalVariables.grabageClearingTime);
 }
-async function fetchDefaultSVG(fileName='default.svg'): Promise<File> {
+async function fetchDefaultSVG(fileName = 'default.svg'): Promise<File> {
   const response = await fetch(fileName);
   const svgContent = await response.text();
   const file = new File([svgContent], 'default.svg', { type: 'image/svg+xml' });

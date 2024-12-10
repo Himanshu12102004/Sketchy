@@ -1,10 +1,10 @@
 import GlobalVariables from './GlobalVariable';
 import { setUniforms } from '../main';
-
 class CanvasEvents {
   static isDragging: boolean;
   static dragStartX: number;
   static dragStartY: number;
+  static isZooming: boolean = false;
   static setIntervalController: number;
   static addEvents() {
     window.addEventListener('resize', () => {
@@ -20,10 +20,18 @@ class CanvasEvents {
     });
 
     GlobalVariables.canvas.addEventListener('wheel', (e) => {
+      CanvasEvents.isZooming = true; // Set zooming flag
       CanvasEvents.onZoom(e);
+      setTimeout(() => {
+        CanvasEvents.isZooming = false; // Reset zooming flag after a delay
+      }, 50); // Adjust delay as needed for responsiveness
     });
+
+    // Mouse Events
     GlobalVariables.canvas.addEventListener('mousemove', (e) => {
-      CanvasEvents.onPan(e);
+      if (!CanvasEvents.isZooming) {
+        CanvasEvents.onPan(e);
+      }
     });
     GlobalVariables.canvas.addEventListener('mousedown', (e) => {
       CanvasEvents.isDragging = false;
@@ -37,9 +45,81 @@ class CanvasEvents {
         dragEndX - CanvasEvents.dragStartX,
         dragEndY - CanvasEvents.dragStartY
       );
-      if (distance < 5) {
-      } else {
-        CanvasEvents.isDragging = true;
+      CanvasEvents.isDragging = distance >= 5;
+    });
+
+    // Touch Events
+    GlobalVariables.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        CanvasEvents.isDragging = false;
+        CanvasEvents.dragStartX = touch.clientX;
+        CanvasEvents.dragStartY = touch.clientY;
+      }
+    });
+
+    GlobalVariables.canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && !CanvasEvents.isZooming) {
+        const touch = e.touches[0];
+        const movementX = touch.clientX - CanvasEvents.dragStartX;
+        const movementY = touch.clientY - CanvasEvents.dragStartY;
+        const mockMouseEvent = new MouseEvent('mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          movementX,
+          movementY,
+          bubbles: true,
+          buttons: 1,
+        });
+        CanvasEvents.onPan(mockMouseEvent);
+        CanvasEvents.dragStartX = touch.clientX;
+        CanvasEvents.dragStartY = touch.clientY;
+      }
+    });
+    GlobalVariables.canvas.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        CanvasEvents.isDragging = false;
+      }
+    });
+
+    GlobalVariables.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        CanvasEvents.isZooming = true; // Set zooming flag
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        GlobalVariables.touchZoomData = {
+          initialDistance: Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+          ),
+        };
+      }
+    });
+
+    GlobalVariables.canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+
+        const scaleChange =
+          currentDistance / GlobalVariables.touchZoomData.initialDistance;
+        const mockWheelEvent = new WheelEvent('wheel', {
+          deltaY: scaleChange > 1 ? -1 : 1, // Simulate zoom in or out
+          bubbles: true,
+        });
+        CanvasEvents.onZoom(mockWheelEvent);
+
+        GlobalVariables.touchZoomData.initialDistance = currentDistance;
+      }
+    });
+
+    GlobalVariables.canvas.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        CanvasEvents.isZooming = false; // Reset zooming flag
       }
     });
   }
