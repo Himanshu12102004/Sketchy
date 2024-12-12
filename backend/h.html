@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload</title>
+  </head>
+  <body>
+    <img
+      src="https://res.cloudinary.com/dni3bvxqo/raw/upload/v1733808374/k1tivqornq2itx2ls8dg"
+      alt="f"
+    />
+    <h1>Upload File to Cloudinary</h1>
+    <form id="uploadForm">
+      <label for="file">Select a file:</label>
+      <input type="file" id="file" accept=".svg, .jpg, .png" required />
+      <br /><br />
+      <label for="tags">Tags (optional):</label>
+      <input type="text" id="tags" placeholder="Enter tags, comma-separated" />
+      <br /><br />
+      <button type="submit">Upload</button>
+    </form>
+
+    <div id="response" style="margin-top: 20px"></div>
+
+    <script>
+      fetch(
+        'https://res.cloudinary.com/dni3bvxqo/raw/upload/v1733808863/tsqkovtzowiasfvvzlrd'
+      ).then((res) => {
+        res.text().then((sol) => {
+          console.log(sol);
+        });
+      });
+      document
+        .getElementById('uploadForm')
+        .addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById('file');
+          const tagsInput = document.getElementById('tags');
+          const responseDiv = document.getElementById('response');
+
+          if (!fileInput.files.length) {
+            alert('Please select a file.');
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append('file', fileInput.files[0]);
+          formData.append('tags', tagsInput.value);
+
+          try {
+            responseDiv.innerHTML = 'Uploading...';
+            const response = await fetch('http://localhost:3000/upload', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to upload file');
+            }
+
+            const result = await response.json();
+            responseDiv.innerHTML = `
+          <p>File uploaded successfully!</p>
+          <p><strong>URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+        `;
+          } catch (error) {
+            responseDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          }
+        });
+    </script>
+  </body>
+</html>
